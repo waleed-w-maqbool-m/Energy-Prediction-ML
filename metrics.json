@@ -1,0 +1,18 @@
+{
+  "gb": {
+    "rmse": 1965.9794705662596,
+    "mae": 1489.4853950372594,
+    "r2": 0.833250017008291
+  },
+  "baseline": {
+    "rmse": 2429.605936524223,
+    "mae": 1843.8015946817343,
+    "r2": 0.7453289836524732
+  },
+  "best_params": {
+    "regressor__learning_rate": 0.1,
+    "regressor__max_depth": 2,
+    "regressor__n_estimators": 200
+  },
+  "improvement_pct": 19.082372947327592
+}
