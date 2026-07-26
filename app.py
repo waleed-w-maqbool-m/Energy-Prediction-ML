@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 st.set_page_config(
-    page_title="Energy Demand Forecast",
+    page_title="PJM Grid Energy Demand Forecast",
     page_icon="⚡",
     layout="wide",
 )
@@ -39,11 +39,14 @@ history, results, importance, metrics = load_data()
 # HEADER
 # --------------------------------------------------
 
-st.title("⚡ Energy Demand Forecast")
+st.title("⚡ PJM Grid Energy Demand Forecast")
 st.caption(
-    "Gradient Boosting model trained on real PJM Interconnection grid data "
-    "(2002–2018, US Eastern Interconnection). Forecasts next-day electricity "
-    "demand from calendar and lagged-demand features."
+    "Gradient Boosting model trained on real electricity demand data from "
+    "**PJM Interconnection** — a regional grid operator covering parts of "
+    "Delaware, Illinois, Indiana, Kentucky, Maryland, Michigan, New Jersey, "
+    "North Carolina, Ohio, Pennsylvania, Tennessee, Virginia, West Virginia, "
+    "and Washington D.C. (Eastern USA), 2002–2018. Forecasts next-day demand "
+    "from calendar and lagged-demand features."
 )
 
 # --------------------------------------------------
@@ -140,8 +143,10 @@ st.divider()
 
 st.subheader("🔮 Try a Custom Prediction")
 st.caption(
-    "Pick a day profile and recent demand levels to see what the model forecasts. "
-    "Lag values default to recent historical averages but can be adjusted."
+    "Pick a day profile and recent demand levels to see what the model forecasts "
+    "for the **PJM grid region** (parts of DE, IL, IN, KY, MD, MI, NJ, NC, OH, PA, "
+    "TN, VA, WV, and Washington D.C. — Eastern USA). Lag values default to recent "
+    "historical averages but can be adjusted."
 )
 
 recent = history.tail(30)
@@ -179,7 +184,12 @@ input_row = pd.DataFrame([{
 
 if st.button("Predict demand", type="primary"):
     prediction = model.predict(input_row)[0]
-    st.metric("Predicted demand", f"{prediction:,.0f} MW")
+    st.metric("Predicted PJM grid demand", f"{prediction:,.0f} MW")
+    st.caption(
+        f"For reference: historical PJM demand ranges from roughly "
+        f"{history['demand_mw'].min():,.0f} to {history['demand_mw'].max():,.0f} MW "
+        f"across the full 2002–2018 dataset."
+    )
 
 st.divider()
 st.caption(
