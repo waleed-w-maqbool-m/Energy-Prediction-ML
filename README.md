@@ -1,92 +1,249 @@
-# PJM Grid Energy Demand Forecast
+# ⚡ PJM Grid Energy Demand Forecast
 
-An interactive dashboard forecasting next-day electricity demand for the
-**PJM Interconnection grid region** (parts of Delaware, Illinois, Indiana,
-Kentucky, Maryland, Michigan, New Jersey, North Carolina, Ohio, Pennsylvania,
-Tennessee, Virginia, West Virginia, and Washington D.C. — Eastern USA),
-using a Gradient Boosting model trained on real historical grid data
-(2002–2018).
+> An interactive **Streamlit dashboard** that predicts **next-day electricity demand** for the **PJM Interconnection** using a **Gradient Boosting Regressor** trained on real historical grid demand data (2002–2018).
 
-**[Live app link — add after deploying]**
+<p align="center">
 
-## What it does
+![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.8.0-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
-- Trains a Gradient Boosting Regressor on calendar features (day of week,
-  month, season, weekend flag) and lagged demand features (yesterday, same
-  day last week, 7-day rolling average).
-- Uses `TimeSeriesSplit` cross-validation and a chronological train/test
-  split — standard practice for time series, unlike a shuffled K-Fold which
-  would leak future data into training.
-- Benchmarks against a naive "yesterday = today" baseline so the reported
-  error numbers have context.
-- Serves everything through an interactive Streamlit dashboard: actual vs.
-  predicted demand over a selectable date range, a predicted-vs-actual
-  scatter plot, feature importances, and a form to generate a custom
-  prediction (clearly labeled as PJM-region demand, in MW).
+</p>
 
-## Data source
+---
 
-PJM Interconnection hourly grid demand (megawatts), originally published on
-Kaggle as ["Hourly Energy Consumption"](https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption)
-by robikscube.
+## 🌐 Live Demo
 
-## Project structure
+**🔗 Live App:** *Coming Soon*
 
-```
+---
+
+## 📖 Overview
+
+This project forecasts **next-day electricity demand** for the **PJM Interconnection**, one of North America's largest power grids.
+
+Instead of relying on random train-test splits, the model follows proper **time-series forecasting practices**, using chronological validation and engineered historical demand features to predict future energy consumption.
+
+The application is deployed through an interactive **Streamlit dashboard** that allows users to visualize historical demand, inspect model performance, and generate demand forecasts.
+
+---
+
+## ✨ Features
+
+- 📈 Forecast next-day electricity demand
+- ⚡ Gradient Boosting Regression model
+- 📅 Calendar-based feature engineering
+- 🔄 Lag-based historical demand features
+- 📊 Actual vs Predicted visualization
+- 🎯 Predicted vs Actual scatter plot
+- 📌 Feature importance analysis
+- 🧮 Baseline comparison ("Yesterday = Today")
+- 🖥️ Interactive Streamlit dashboard
+- 🚀 Instant predictions (no retraining required)
+
+---
+
+## 🧠 Model
+
+### Features Used
+
+**Calendar Features**
+
+- Day of week
+- Month
+- Season
+- Weekend indicator
+
+**Historical Demand Features**
+
+- Previous day's demand
+- Same day last week's demand
+- 7-day rolling average
+
+### Validation Strategy
+
+The model uses:
+
+- ✅ Chronological Train/Test Split
+- ✅ `TimeSeriesSplit` Cross Validation
+
+This prevents **data leakage**, ensuring future observations never influence model training.
+
+---
+
+## 📊 Dashboard
+
+The Streamlit dashboard includes:
+
+- Historical demand visualization
+- Actual vs Predicted comparison
+- Prediction scatter plot
+- Feature importance chart
+- Interactive custom demand prediction
+
+> All predictions are reported in **Megawatts (MW)** for the **PJM grid region**.
+
+---
+
+## 📂 Project Structure
+
+```text
 energy_app/
-├── app.py                    # Streamlit app (loads precomputed artifacts only)
-├── train_model.py            # Offline training script — run this to regenerate artifacts
-├── model.joblib               # Trained pipeline (preprocessor + Gradient Boosting model)
-├── test_results.csv           # Actual vs. predicted values for the test period
-├── processed_history.csv      # Full daily series with engineered features
-├── feature_importance.csv     # Feature importance rankings
-├── metrics.json                # RMSE / MAE / R² for model and baseline
-├── requirements.txt            # Pinned deps for the deployed app
-└── requirements-train.txt      # Deps for retraining only (adds kagglehub)
+│
+├── app.py
+├── train_model.py
+├── model.joblib
+├── processed_history.csv
+├── test_results.csv
+├── feature_importance.csv
+├── metrics.json
+├── requirements.txt
+└── requirements-train.txt
 ```
 
-The app **does not retrain on load** — it reads the artifacts above. This
-keeps the deployed app fast and avoids needing Kaggle credentials at runtime.
+---
 
-## Running locally
+## 🚀 Running Locally
+
+Install dependencies
 
 ```bash
 pip install -r requirements.txt
+```
+
+Run the application
+
+```bash
 streamlit run app.py
 ```
 
-Dependency versions in `requirements.txt` are pinned to match the exact
-scikit-learn version the model was trained with (1.8.0). Installing a
-different scikit-learn version can cause the saved model to fail loading
-with errors like `ModuleNotFoundError: No module named '_loss'`.
+---
 
-## Retraining with fresh data
+## 🔄 Retraining the Model
 
-`train_model.py` pulls the dataset directly from Kaggle via `kagglehub`,
-so it always uses the canonical source rather than a third-party mirror.
+The training script downloads the latest dataset directly from **Kaggle** using **kagglehub**.
 
-1. Create a free Kaggle account and generate an API token (Account Settings
-   → API → "Create New Token"). This downloads `kaggle.json`.
-2. Place it at `~/.kaggle/kaggle.json` (Linux/Mac) or
-   `C:\Users\<you>\.kaggle\kaggle.json` (Windows), or set the
-   `KAGGLE_USERNAME` / `KAGGLE_KEY` environment variables instead.
-3. Install training dependencies: `pip install -r requirements-train.txt`
-4. Run `python train_model.py` — `kagglehub` downloads and caches the
-   dataset automatically, then the script regenerates all five artifact
-   files (`model.joblib`, `test_results.csv`, `processed_history.csv`,
-   `feature_importance.csv`, `metrics.json`).
-5. Restart the Streamlit app (or redeploy) to pick up the new artifacts.
-   If you install a newer scikit-learn to retrain, update the pin in
-   `requirements.txt` to match.
+### Steps
 
-## Deploying (Streamlit Community Cloud — free)
+1. Create a Kaggle account.
+2. Generate an API token (`kaggle.json`).
+3. Place it inside:
 
-1. Push this folder to a public GitHub repo.
-2. Go to [share.streamlit.io](https://share.streamlit.io), sign in with
-   GitHub, and click "New app."
-3. Point it at your repo, branch, and `app.py`.
-4. Deploy — it installs `requirements.txt` automatically and gives you a
-   public URL.
+**Linux / macOS**
 
-No secrets or API keys are needed for deployment since the model and data
-are pre-baked into the repo as static files.
+```text
+~/.kaggle/kaggle.json
+```
+
+**Windows**
+
+```text
+C:\Users\<username>\.kaggle\kaggle.json
+```
+
+Alternatively, set:
+
+```
+KAGGLE_USERNAME
+KAGGLE_KEY
+```
+
+Install training dependencies
+
+```bash
+pip install -r requirements-train.txt
+```
+
+Run training
+
+```bash
+python train_model.py
+```
+
+This regenerates:
+
+- `model.joblib`
+- `processed_history.csv`
+- `test_results.csv`
+- `feature_importance.csv`
+- `metrics.json`
+
+---
+
+## ⚠️ Version Compatibility
+
+The saved model was trained with
+
+```
+scikit-learn==1.8.0
+```
+
+Using a different version may produce serialization errors such as
+
+```python
+ModuleNotFoundError: No module named '_loss'
+```
+
+The deployment requirements are pinned to ensure compatibility.
+
+---
+
+## ☁️ Deployment
+
+Deploy for free using **Streamlit Community Cloud**.
+
+1. Push the project to GitHub
+2. Create a new Streamlit app
+3. Select your repository
+4. Choose `app.py`
+5. Deploy
+
+No API keys or secrets are required because the trained model and processed datasets are already included in the repository.
+
+---
+
+## 📊 Dataset
+
+**Source**
+
+**Hourly Energy Consumption (PJM Interconnection)**
+
+Originally published on Kaggle by **robikscube**.
+
+https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Tools |
+|-----------|-------|
+| Language | Python |
+| ML | Scikit-learn |
+| Data | Pandas, NumPy |
+| Visualization | Matplotlib |
+| App | Streamlit |
+| Model Storage | Joblib |
+
+---
+
+## 📌 Future Improvements
+
+- Deep learning models (LSTM)
+- XGBoost comparison
+- Weather data integration
+- Holiday-aware forecasting
+- Multi-day forecasting
+- Hyperparameter optimization
+
+---
+
+## 👨‍💻 Author
+
+**Waleed Maqbool**
+
+Electrical Engineering (Computer Engineering)  
+FAST-NUCES Lahore
+
+Interested in AI, Machine Learning, Predictive Analytics, and Intelligent Energy Systems.
