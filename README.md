@@ -239,11 +239,4 @@ https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption
 
 ---
 
-## 👨‍💻 Author
 
-**Waleed Maqbool**
-
-Electrical Engineering (Computer Engineering)  
-FAST-NUCES Lahore
-
-Interested in AI, Machine Learning, Predictive Analytics, and Intelligent Energy Systems.
