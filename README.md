@@ -4,10 +4,15 @@ Seven-day electricity demand forecasts for the PJM East grid region, with calibr
 what-if weather scenario tool and a public API. The model is trained in Python and **runs in JavaScript on
 Cloudflare**: the dashboard evaluates it in your browser and a Cloudflare Worker serves the same code as an API.
 
-![Forecast studio](docs/dashboard.png)
+![Dashboard demo: what-if weather scenarios and the Play replay](docs/demo.gif)
 
-<sub>A 7-day forecast for a July 2017 week, with a +5 °C heatwave scenario in orange. The dashboard follows the system
-light/dark setting ([dark screenshot](docs/dashboard-dark.png)).</sub>
+<sub>Dragging the weather scenario and pressing Play: every change re-runs a full 7-day recursive forecast in the browser
+and the chart glides to the new answer.</sub>
+
+![Dashboard](docs/dashboard.png)
+
+<sub>A July 2017 week with a +5 °C heatwave scenario in orange. The page follows the system light/dark setting
+([dark screenshot](docs/dashboard-dark.png)).</sub>
 
 <!-- Add after deploying:  **Live demo:** https://<your-worker>.workers.dev -->
 
@@ -84,10 +89,14 @@ builder makes every platform compute identical values.
 - Explainability: permutation importance on the hold-out, and a demand-vs-temperature view showing the V-shape behind the
   degree-day features.
 
-**Frontend** (`web/`, static HTML/CSS/ES modules, Plotly): a forecast studio where you pick any origin date, horizon,
-weather assumption and a temperature scenario and the full recursive forecast re-runs instantly in the browser; accuracy
-views (model comparison, hold-out with range slider, error by horizon, yearly stability); driver analysis; a method and
-limitations page. Light and dark themes, keyboard-accessible tabs, responsive down to phone width, CSV export.
+**Frontend** (`web/`, static HTML/CSS/ES modules, Plotly): one scrolling page with a sticky nav that highlights where you
+are, four sections (Forecast, Accuracy, Temperature, About) and no hidden tabs.
+- **Forecast:** step through any day with the arrows or press **Play** to replay the model forecasting through real history;
+  switch between known and normal weather; drag the temperature slider or tap *Cold snap* / *Heatwave*.
+  The forecast, range and headline number glide to each new answer instead of jumping.
+- **Motion:** the hero line draws real demand and then the model's forecast over it; the stats count up and the
+  charts grow in as you scroll to them. Everything respects `prefers-reduced-motion`.
+- Light and dark themes, keyboard-accessible controls, responsive down to phone width, CSV export.
 
 **Backend** (`worker/`, Cloudflare Worker): `GET /api/forecast`, `POST /api/predict`, `GET /api/model`, `GET /api/health`,
 with input validation (422 with the reason), CORS and cache headers.
