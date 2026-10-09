@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PJM East Demand Forecast</title>
+  <meta name="description" content="Seven-day electricity demand forecasts for the PJM East grid region, with calibrated prediction intervals, a weather scenario tool and a public API.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M18 2 6 18h8l-2 12 12-17h-8z' fill='%232a78d6'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="masthead">
+      <h1>PJM East electricity demand, forecast a week ahead</h1>
+      <p>A gradient-boosting model that combines temperature, calendar and recent demand to predict daily grid
+        load, with prediction intervals calibrated on held-out data. Trained on 2002&ndash;2018 data for the eastern
+        part of the largest U.S. grid operator. The model runs in your browser.</p>
+    </header>
+
+    <section class="scoreboard" id="scoreboard" aria-label="Headline results"></section>
+
+    <div class="tabs" role="tablist" aria-label="Sections">
+      <button role="tab" id="t-forecast" aria-controls="tab-forecast" aria-selected="true">Forecast studio</button>
+      <button role="tab" id="t-accuracy" aria-controls="tab-accuracy" aria-selected="false" tabindex="-1">Accuracy</button>
+      <button role="tab" id="t-drivers" aria-controls="tab-drivers" aria-selected="false" tabindex="-1">What drives demand</button>
+      <button role="tab" id="t-method" aria-controls="tab-method" aria-selected="false" tabindex="-1">Method and API</button>
+    </div>
+
+    <!-- Forecast studio -->
+    <section class="panel" id="tab-forecast" role="tabpanel" aria-labelledby="t-forecast">
+      <div class="studio">
+        <form class="controls" id="controls" onsubmit="return false">
+          <label class="field">
+            <span class="label">Last known day <span class="hint" title="The forecast is issued at the end of this day, using demand up to and including it. The default is three days before the busiest day in the hold-out period.">?</span></span>
+            <input type="date" id="origin">
+          </label>
+          <label class="field">
+            <span class="label">Days ahead <output id="horizon-out">7</output></span>
+            <input type="range" id="horizon" min="1" max="7" step="1" value="7">
+          </label>
+          <fieldset class="field">
+            <legend class="label">Weather assumption <span class="hint" title="The model needs each day's temperature. In production it would come from a weather forecast. 'Accurate' uses the temperatures that actually occurred; 'normal' uses the seasonal average, which is what you would have with no weather forecast at all (wider intervals, larger errors).">?</span></legend>
+            <label class="radio"><input type="radio" name="weather" value="actual" checked> Accurate weather forecast</label>
+            <label class="radio"><input type="radio" name="weather" value="climatology"> Normal weather for the season</label>
+          </fieldset>
+          <label class="field">
+            <span class="label">Temperature scenario <output id="shift-out">+0.0 &deg;C</output>
+              <span class="hint" title="Adds this many degrees to every forecast day and re-runs the full recursive forecast. Try +5 in July for a heatwave or &minus;8 in January for a cold snap.">?</span></span>
+            <input type="range" id="shift" min="-8" max="8" step="0.5" value="0">
+          </label>
+        </form>
+
+        <div class="view">
+          <div class="result" id="result" aria-live="polite"></div>
+          <div class="chart" id="chart-forecast" role="img" aria-label="Forecast chart"></div>
+          <p class="note" id="scenario-note" hidden></p>
+          <p class="note" id="data-note" hidden></p>
+          <div class="table-wrap"><table id="forecast-table"></table></div>
+          <button class="button" id="download" type="button">Download forecast (CSV)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Accuracy -->
+    <section class="panel" id="tab-accuracy" role="tabpanel" aria-labelledby="t-accuracy" hidden>
+      <h2>How it compares</h2>
+      <p class="note" id="compare-note"></p>
+      <div class="chart short" id="chart-compare"></div>
+      <div class="table-wrap"><table id="compare-table"></table></div>
+
+      <h2>Day-ahead forecasts against actual demand</h2>
+      <div class="chart tall" id="chart-holdout"></div>
+
+      <h2>Accuracy by forecast horizon</h2>
+      <div class="two-col">
+        <div class="chart" id="chart-horizon"></div>
+        <div>
+          <h3>How often the 80% interval contains the actual value (%)</h3>
+          <div class="table-wrap"><table id="coverage-table"></table></div>
+          <p class="note">Intervals are calibrated on a two-year window before the hold-out and then checked on the
+            hold-out. They are somewhat too narrow when the weather is assumed rather than known, which is why that
+            case is reported separately.</p>
+        </div>
+      </div>
+
+      <h2>Stability across years</h2>
+      <div class="chart" id="chart-years"></div>
+      <p class="note">Walk-forward backtest: for each year the model is retrained on everything before it, then scored
+        one day ahead on that year.</p>
+    </section>
+
+    <!-- Drivers -->
+    <section class="panel" id="tab-drivers" role="tabpanel" aria-labelledby="t-drivers" hidden>
+      <div class="two-col">
+        <div>
+          <h2>Which inputs matter</h2>
+          <div class="chart" id="chart-importance" style="height:420px"></div>
+          <p class="note">Permutation importance on the hold-out: how much worse the forecast gets when one input is
+            randomly shuffled. Recent demand sets the level; temperature explains the day-to-day swings that
+            yesterday's demand cannot.</p>
+        </div>
+        <div>
+          <h2>Demand against temperature</h2>
+          <div class="chart" id="chart-scatter"></div>
+          <p class="note">Demand rises in both directions away from a mild day: heating in winter, air conditioning in
+            summer. Heating and cooling degree days (distance from 18.3&nbsp;&deg;C) give the model this V-shape
+            directly.</p>
+        </div>
+      </div>
+
+      <h2>Where the model is weakest</h2>
+      <div class="two-col">
+        <div>
+          <div class="chart short" id="chart-months"></div>
+          <p class="note">Mean absolute percentage error by calendar month, hold-out period.</p>
+        </div>
+        <div>
+          <div class="table-wrap"><table id="daytype-table"></table></div>
+          <h3>Largest misses</h3>
+          <div class="table-wrap"><table id="worst-table"></table></div>
+          <p class="note" id="worst-note"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Method -->
+    <section class="panel" id="tab-method" role="tabpanel" aria-labelledby="t-method" hidden>
+      <div class="two-col wide-left">
+        <div class="prose" id="method-text"></div>
+        <div>
+          <h2>REST API</h2>
+          <p>The same forecaster runs in a Cloudflare Worker, sharing its code with this page:</p>
+          <pre class="code"><code>GET  /api/forecast?origin=2017-07-10&amp;horizon=7
+GET  /api/model
+GET  /api/health
+POST /api/predict</code></pre>
+          <div class="try">
+            <button class="button" id="try-api" type="button">Try it: GET /api/forecast</button>
+            <pre class="code output" id="try-out" hidden></pre>
+          </div>
+          <p class="note"><code>POST /predict</code> takes your own last 28&ndash;60 days of demand and a temperature.
+            Errors return a 422 with the reason.</p>
+          <h2>Model details</h2>
+          <ul class="plain" id="model-details"></ul>
+          <p id="repo-link"></p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="note footer">Demand data: PJM Interconnection via the Kaggle dataset &ldquo;Hourly Energy
+      Consumption&rdquo; (robikscube). Weather data by <a href="https://open-meteo.com/">Open-Meteo.com</a>
+      (ERA5, CC BY 4.0). Charts by Plotly.js (MIT).</footer>
+  </main>
+
+  <noscript><p class="note" style="padding:1rem">This dashboard runs the forecasting model in JavaScript, so it needs
+    JavaScript enabled.</p></noscript>
+  <script src="vendor/plotly-basic.min.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

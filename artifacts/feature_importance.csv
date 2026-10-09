@@ -1,0 +1,25 @@
+feature,group,rmse_increase_mw,std
+lag_1,Demand history,3215.013,65.827
+temp_mean,Weather,2101.271,50.037
+temp_max,Weather,593.643,28.004
+is_nonworking,Calendar,558.511,23.108
+temp_mean_roll3,Weather,303.3,17.628
+dow,Calendar,290.893,13.769
+temp_delta_1,Weather,217.094,17.795
+temp_min,Weather,128.986,8.675
+lag_1_nonworking,Demand history,96.059,13.322
+roll7_mean,Demand history,54.053,7.197
+hdd,Weather,28.166,2.903
+doy_sin,Calendar,23.971,4.817
+lag_2,Demand history,22.204,6.388
+doy_cos,Calendar,15.757,5.105
+is_holiday,Calendar,10.434,3.086
+lag_7,Demand history,6.22,6.961
+roll28_mean,Demand history,4.465,5.607
+lag_14,Demand history,3.843,2.091
+month,Calendar,2.685,1.24
+lag_7_nonworking,Demand history,1.338,0.3
+post_holiday,Calendar,0.636,0.718
+is_weekend,Calendar,0.0,0.0
+cdd,Weather,0.0,0.0
+pre_holiday,Calendar,-0.132,1.156

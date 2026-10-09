@@ -1,0 +1,15 @@
+{
+  "name": "pjm-energy-forecast",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "PJM East demand forecast: static dashboard + forecast API on Cloudflare Workers",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node --test \"worker/test/*.test.mjs\""
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

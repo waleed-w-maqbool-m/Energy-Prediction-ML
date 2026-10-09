@@ -1,0 +1,183 @@
+{
+  "model": {
+    "name": "HistGradientBoostingRegressor",
+    "params": {
+      "min_samples_leaf": 10,
+      "max_leaf_nodes": 31,
+      "max_iter": 500,
+      "max_depth": 3,
+      "learning_rate": 0.08,
+      "l2_regularization": 0.1
+    },
+    "n_features": 24,
+    "features": [
+      "dow",
+      "month",
+      "doy_sin",
+      "doy_cos",
+      "is_weekend",
+      "is_holiday",
+      "pre_holiday",
+      "post_holiday",
+      "is_nonworking",
+      "temp_mean",
+      "temp_max",
+      "temp_min",
+      "hdd",
+      "cdd",
+      "temp_mean_roll3",
+      "temp_delta_1",
+      "lag_1",
+      "lag_2",
+      "lag_7",
+      "lag_14",
+      "roll7_mean",
+      "roll28_mean",
+      "lag_1_nonworking",
+      "lag_7_nonworking"
+    ],
+    "cv_rmse": 929.8220179323864
+  },
+  "split": {
+    "train_start": "2002-01-29",
+    "train_end": "2016-02-09",
+    "calibration_start": "2014-02-10",
+    "test_start": "2016-02-10",
+    "test_end": "2018-08-02",
+    "n_train": 5125,
+    "n_test": 905
+  },
+  "holdout": {
+    "rmse": 832.2533385936683,
+    "mae": 661.6615814835473,
+    "mape": 2.141503644310129,
+    "r2": 0.9701757889538677
+  },
+  "baseline": {
+    "rmse": 2428.281048352442,
+    "mae": 1841.344394475138,
+    "mape": 5.914277372495061,
+    "r2": 0.7461040503780629
+  },
+  "improvement_pct": 65.72664687399583,
+  "comparison": [
+    {
+      "model": "Seasonal naive: same weekday last week",
+      "note": "Baseline",
+      "rmse": 4297.780211681531,
+      "mae": 3173.20824640884,
+      "mape": 9.921499611249974,
+      "r2": 0.20467199377509915
+    },
+    {
+      "model": "Naive: same as yesterday",
+      "note": "Baseline",
+      "rmse": 2428.281048352442,
+      "mae": 1841.344394475138,
+      "mape": 5.914277372495061,
+      "r2": 0.7461040503780629
+    },
+    {
+      "model": "Gradient boosting, calendar + lags (v1)",
+      "note": "The original model: no weather, no holidays",
+      "rmse": 1971.401129628609,
+      "mae": 1492.9902865371807,
+      "mape": 4.740501387068543,
+      "r2": 0.8326568753102246
+    },
+    {
+      "model": "Hist. gradient boosting, no weather",
+      "note": "Ablation: final model with the weather features removed",
+      "rmse": 1870.6901525672567,
+      "mae": 1398.5538857631627,
+      "mape": 4.423847417526221,
+      "r2": 0.8493179250165478
+    },
+    {
+      "model": "Ridge regression",
+      "note": "Linear, with degree-day weather terms",
+      "rmse": 1184.38104143371,
+      "mae": 955.9948645211,
+      "mape": 3.138238517677184,
+      "r2": 0.9395994677297098
+    },
+    {
+      "model": "Hist. gradient boosting + weather (final)",
+      "note": "Production model",
+      "rmse": 832.2533385936683,
+      "mae": 661.6615814835473,
+      "mape": 2.141503644310129,
+      "r2": 0.9701757889538677
+    }
+  ],
+  "intervals": {
+    "actual": {
+      "1": [
+        -0.039521335604212726,
+        0.022394067642169186
+      ],
+      "2": [
+        -0.05120070906750276,
+        0.02324612976865247
+      ],
+      "3": [
+        -0.05516925424842011,
+        0.023476203135075285
+      ],
+      "4": [
+        -0.056127879121298796,
+        0.02429867639592696
+      ],
+      "5": [
+        -0.05758006310661612,
+        0.025867058521823832
+      ],
+      "6": [
+        -0.05766063073814234,
+        0.02608688836725344
+      ],
+      "7": [
+        -0.058095633906556574,
+        0.027537952364769986
+      ]
+    },
+    "climatology": {
+      "1": [
+        -0.08465603253263342,
+        0.09828959830853962
+      ],
+      "2": [
+        -0.11307685155027325,
+        0.11606472141401641
+      ],
+      "3": [
+        -0.11676013001583066,
+        0.12252989094662015
+      ],
+      "4": [
+        -0.12222448408118734,
+        0.12020893584764727
+      ],
+      "5": [
+        -0.12285373784027703,
+        0.11822286253176825
+      ],
+      "6": [
+        -0.1252720128372375,
+        0.11630735162141762
+      ],
+      "7": [
+        -0.12533417365466365,
+        0.11620073518871815
+      ]
+    }
+  },
+  "interval_nominal_coverage": 0.8,
+  "environment": {
+    "python": "3.14.6",
+    "scikit-learn": "1.8.0",
+    "pandas": "3.0.5",
+    "numpy": "2.5.1"
+  },
+  "trained_at": "2026-10-09T10:53:55+00:00"
+}
