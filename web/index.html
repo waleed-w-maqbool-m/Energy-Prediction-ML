@@ -3,62 +3,96 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PJM East Demand Forecast</title>
-  <meta name="description" content="Power demand for the PJM East grid, forecast a week ahead. Change the date or the weather and the model re-forecasts instantly in your browser.">
+  <title>Can a model predict tomorrow's power demand?</title>
+  <meta name="description" content="A forecasting model for the PJM East power grid, tested on 2.5 years it never saw. Change the weather and watch the forecast move.">
   <meta name="color-scheme" content="light dark">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M18 2 6 18h8l-2 12 12-17h-8z' fill='%232a78d6'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="css/style.css">
+  <script>document.documentElement.classList.add("js");</script>
 </head>
 <body>
   <header class="nav">
-    <a class="brand" href="#top" aria-label="PJM East Forecast, back to top">
+    <a class="brand" href="#top" aria-label="Back to top">
       <svg viewBox="0 0 32 32" width="22" height="22" aria-hidden="true"><path d="M18 2 6 18h8l-2 12 12-17h-8z"/></svg>
-      <span>PJM East Forecast</span>
+      <span>PJM East</span>
     </a>
     <nav aria-label="Sections">
-      <a href="#forecast" data-nav="forecast">Forecast</a>
       <a href="#accuracy" data-nav="accuracy">Accuracy</a>
       <a href="#temperature" data-nav="temperature">Temperature</a>
-      <a href="#about" data-nav="about">About</a>
+      <a href="#try" data-nav="try">Try it</a>
+      <a href="#limits" data-nav="limits">Limits</a>
     </nav>
+    <div class="progress" id="progress" aria-hidden="true"></div>
   </header>
 
-  <main class="page" id="top">
+  <main id="top">
+    <!-- Intro -->
     <section class="hero">
-      <h1>Power demand, forecast a week ahead</h1>
-      <p>Pick a day, then change the weather. The model re-forecasts the PJM East grid instantly, right in your browser.</p>
-      <svg class="ribbon" id="ribbon" viewBox="0 0 1200 120" preserveAspectRatio="none" role="img"
-           aria-label="Two and a half years of real demand and the model's day-ahead forecast"></svg>
-      <div class="ribbon-key"><span class="k-actual">Real demand</span><span class="k-model">Model's day-ahead forecast</span><span>2016&ndash;2018, never seen in training</span></div>
+      <div class="wrap">
+        <h1 aria-label="Can a model predict tomorrow's power demand?">
+          <span class="w" style="--i:0">Can</span> <span class="w" style="--i:1">a</span> <span class="w" style="--i:2">model</span>
+          <span class="w" style="--i:3">predict</span> <span class="w" style="--i:4">tomorrow's</span>
+          <span class="w" style="--i:5">power</span> <span class="w" style="--i:6">demand?</span>
+        </h1>
+        <p class="hero-sub">We tested one on the PJM East grid.</p>
+      </div>
+      <svg class="hero-line" id="hero-line" aria-hidden="true"></svg>
+      <a class="cue" href="#accuracy" aria-label="Scroll to continue">
+        <span>Scroll</span>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
     </section>
 
-    <!-- 1. Forecast -->
-    <section class="block" id="forecast" aria-labelledby="h-forecast">
-      <h2 id="h-forecast">Forecast</h2>
-
-      <div class="controlbar" id="controls">
-        <div class="ctl">
-          <span class="ctl-label" id="l-date">Forecast made at the end of</span>
-          <div class="stepper" role="group" aria-labelledby="l-date">
-            <button type="button" id="prev" aria-label="Previous day">&lsaquo;</button>
-            <input type="date" id="origin" aria-labelledby="l-date">
-            <button type="button" id="next" aria-label="Next day">&rsaquo;</button>
-            <button type="button" id="play" class="play" aria-pressed="false">&#9654;&ensp;Play</button>
+    <!-- 1. Accuracy: scroll-driven -->
+    <section class="scene" id="accuracy" data-scene="accuracy" aria-labelledby="h-accuracy">
+      <div class="stage wrap">
+        <div class="copy">
+          <h2 id="h-accuracy">It follows the real thing.</h2>
+          <p>Grey is real demand. Blue is the model's forecast, on <span id="n-days"></span> days it never saw.</p>
+        </div>
+        <div class="ribbon-wrap">
+          <svg class="ribbon" id="ribbon" role="img"
+               aria-label="Real demand and the model's forecast, 2016 to 2018"></svg>
+          <div class="ribbon-key"><span class="k-actual">Real demand</span><span class="k-model">Model forecast</span><span class="k-range">Feb 2016 &ndash; Aug 2018</span></div>
+        </div>
+        <div class="score">
+          <div class="score-n"><span id="score-n">0.0</span><span class="pct">%</span><small>average miss</small></div>
+          <div class="bars" aria-label="Average miss: repeating yesterday versus this model">
+            <div class="bar"><span>Repeat yesterday</span><div class="track"><i id="bar-base"></i></div><b id="bar-base-n"></b></div>
+            <div class="bar model"><span>This model</span><div class="track"><i id="bar-model"></i></div><b id="bar-model-n">0.0%</b></div>
           </div>
         </div>
+      </div>
+    </section>
 
-        <fieldset class="ctl">
-          <legend class="ctl-label">Weather</legend>
-          <div class="segmented">
-            <input type="radio" name="weather" id="w-actual" value="actual" checked><label for="w-actual">Known</label>
-            <input type="radio" name="weather" id="w-clim" value="climatology"><label for="w-clim">Normal</label>
+    <!-- 2. Temperature: scroll-driven -->
+    <section class="scene scene-short" id="temperature" data-scene="temperature" aria-labelledby="h-temperature">
+      <div class="stage wrap">
+        <div class="copy">
+          <h2 id="h-temperature">Temperature does the heavy lifting.</h2>
+          <p>Heat and cold both push demand up. Adding temperature cut the model's error by more than half.</p>
+        </div>
+        <div class="canvas-wrap"><canvas id="scatter" role="img" aria-label="Demand against temperature, a V shape"></canvas></div>
+      </div>
+    </section>
+
+    <!-- 3. Try it -->
+    <section class="block wrap" id="try" aria-labelledby="h-try">
+      <h2 class="reveal" id="h-try">Try it.</h2>
+      <p class="lead reveal">Scrub through 2016&ndash;2018, days the model never saw. Then change the weather.</p>
+
+      <div class="controls reveal">
+        <div class="ctl">
+          <label class="ctl-label" for="time">Day <output id="time-out"></output></label>
+          <div class="time">
+            <button type="button" id="play" class="play" aria-pressed="false">&#9654;&ensp;Play</button>
+            <input type="range" id="time" min="0" max="100" step="1" value="0">
           </div>
-        </fieldset>
-
-        <div class="ctl grow">
+        </div>
+        <div class="ctl">
           <label class="ctl-label" for="shift">What if it's hotter or colder? <output id="shift-out">+0.0 &deg;C</output></label>
           <input type="range" id="shift" min="-8" max="8" step="0.5" value="0">
           <div class="chips">
@@ -69,80 +103,38 @@
         </div>
       </div>
 
-      <p class="note" id="weather-note">Known weather uses the temperatures that actually happened, as a perfect weather forecast would.
-        Normal weather uses the seasonal average, as if you had no forecast at all.</p>
-
       <div class="result" id="result" aria-live="polite">
         <span class="tag" id="tag" hidden>What if</span><span class="big" id="big">&nbsp;</span>
+        <span class="unit">MW tomorrow</span>
         <div class="sub" id="sub"></div>
       </div>
-      <div class="chart" id="chart-forecast" role="img" aria-label="Seven-day demand forecast with prediction interval"></div>
+      <div class="chart" id="chart-forecast" role="img" aria-label="Seven-day demand forecast"></div>
       <p class="note" id="scenario-note" hidden></p>
-      <p class="note" id="data-note" hidden></p>
+      <p class="note">Assumes the day's weather is known, as a weather forecast would provide.</p>
+    </section>
 
-      <details class="numbers">
-        <summary>Daily numbers</summary>
-        <div class="table-wrap"><table id="forecast-table"></table></div>
-        <button class="button" id="download" type="button">Download CSV</button>
+    <!-- 4. Limits -->
+    <section class="block wrap" id="limits" aria-labelledby="h-limits">
+      <h2 class="reveal" id="h-limits">Know the limits.</h2>
+      <ul class="limits" id="limit-list"></ul>
+    </section>
+
+    <footer class="wrap footer">
+      <details>
+        <summary>How it works</summary>
+        <ul id="how"></ul>
       </details>
-    </section>
-
-    <!-- 2. Accuracy -->
-    <section class="block" id="accuracy" aria-labelledby="h-accuracy">
-      <h2 id="h-accuracy">How accurate is it?</h2>
-      <p class="lead">Scored on <span id="n-test"></span> days it never saw while learning.</p>
-      <div class="stats" id="stats"></div>
-      <div class="two-col">
-        <figure>
-          <figcaption>Typical error by model <span>(lower is better)</span></figcaption>
-          <div class="chart short" id="chart-compare"></div>
-        </figure>
-        <figure>
-          <figcaption>Error by days ahead</figcaption>
-          <div class="chart short" id="chart-horizon"></div>
-        </figure>
-      </div>
-      <p class="note" id="accuracy-note"></p>
-    </section>
-
-    <!-- 3. Temperature -->
-    <section class="block" id="temperature" aria-labelledby="h-temperature">
-      <h2 id="h-temperature">Why temperature matters</h2>
-      <div class="split">
-        <p class="lead">Demand rises in both directions away from a mild day: heating in winter, air conditioning in summer.
-          That V-shape is why adding temperature cut the model's error by more than half.</p>
-        <div class="chart" id="chart-scatter"></div>
-      </div>
-    </section>
-
-    <!-- 4. About -->
-    <section class="block" id="about" aria-labelledby="h-about">
-      <h2 id="h-about">About</h2>
-      <div class="about">
-        <div>
-          <details open>
-            <summary>How it works</summary>
-            <ul id="how"></ul>
-          </details>
-          <details>
-            <summary>What it can't do</summary>
-            <ul id="limits"></ul>
-          </details>
-        </div>
-        <div>
-          <h3>Public API</h3>
-          <pre class="code"><code>GET  /api/forecast?origin=2017-07-10
+      <details>
+        <summary>Public API</summary>
+        <pre class="code"><code>GET  /api/forecast?origin=2017-07-10
 GET  /api/model
 POST /api/predict</code></pre>
-          <button class="button" id="try-api" type="button">Try it</button>
-          <pre class="code output" id="try-out" hidden></pre>
-          <p id="repo-link"></p>
-        </div>
-      </div>
-    </section>
-
-    <footer class="footer note">Demand: PJM Interconnection via Kaggle (robikscube). Weather:
-      <a href="https://open-meteo.com/">Open-Meteo.com</a> (ERA5, CC BY 4.0). Charts: Plotly.js (MIT).</footer>
+        <button class="button" id="try-api" type="button">Try it</button>
+        <pre class="code output" id="try-out" hidden></pre>
+      </details>
+      <p class="note">Demand: PJM Interconnection via Kaggle (robikscube). Weather: <a href="https://open-meteo.com/">Open-Meteo.com</a>
+        (ERA5, CC BY 4.0). Charts: Plotly.js (MIT). <span id="repo-link"></span></p>
+    </footer>
   </main>
 
   <noscript><p class="note" style="padding:1rem">This page runs the forecasting model in JavaScript, so it needs JavaScript enabled.</p></noscript>
